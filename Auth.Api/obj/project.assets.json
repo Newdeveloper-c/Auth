@@ -2088,7 +2088,6 @@
   "projectFileDependencyGroups": {
     "net7.0": [
       "Auth.Application >= 1.0.0",
-      "Auth.Domain >= 1.0.0",
       "Auth.Infrastructure >= 1.0.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 7.0.14",
       "Microsoft.EntityFrameworkCore >= 7.0.14",
@@ -2125,9 +2124,6 @@
           "projectReferences": {
             "C:\\Users\\User\\source\\repos\\Auth\\Auth.Application\\Auth.Application.csproj": {
               "projectPath": "C:\\Users\\User\\source\\repos\\Auth\\Auth.Application\\Auth.Application.csproj"
-            },
-            "C:\\Users\\User\\source\\repos\\Auth\\Auth.Domain\\Auth.Domain.csproj": {
-              "projectPath": "C:\\Users\\User\\source\\repos\\Auth\\Auth.Domain\\Auth.Domain.csproj"
             },
             "C:\\Users\\User\\source\\repos\\Auth\\Auth.Infrastructure\\Auth.Infrastructure.csproj": {
               "projectPath": "C:\\Users\\User\\source\\repos\\Auth\\Auth.Infrastructure\\Auth.Infrastructure.csproj"

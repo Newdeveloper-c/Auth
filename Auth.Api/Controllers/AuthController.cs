@@ -38,6 +38,7 @@ public class AuthController : Controller
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Logout()
     {
         var currentContext = _contextAccessor.HttpContext;
@@ -45,7 +46,8 @@ public class AuthController : Controller
         return Ok("Successfully logged out.");
     }
 
-    [HttpGet]
+    [HttpPost]
+    [Authorize]
     public async Task<IActionResult> RefreshToken() 
     {
         var currentContext = _contextAccessor.HttpContext;
@@ -53,7 +55,9 @@ public class AuthController : Controller
         return Ok(token);
     }
 
-    [HttpGet]
+    [HttpPost]
+    [Authorize(Policy = "AdminsOnly")]
+    [Authorize(Policy = "Ceo")]
     public async Task<IActionResult> SetRole(RoleDto dto) 
     {
         var result = _authManager.SetRole(dto);
