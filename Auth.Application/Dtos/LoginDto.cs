@@ -1,4 +1,4 @@
-﻿namespace Auth.Api.Controllers;
+﻿namespace Auth.Application.Dtos;
 
 public class LoginDto
 {

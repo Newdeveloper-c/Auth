@@ -1,4 +1,5 @@
-﻿namespace Auth.Api.Controllers;
+﻿using Auth.Api.Controllers;
+namespace Auth.Application.Dtos;
 
 public class RegisterDto
 {

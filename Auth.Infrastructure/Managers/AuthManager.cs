@@ -1,5 +1,4 @@
-﻿using Auth.Api.Controllers;
-using Auth.Application.Dtos;
+﻿using Auth.Application.Dtos;
 using Auth.Application.Interfaces;
 using Auth.Application.Exceptions;
 using Auth.Domain.Context;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace Auth.Application.Managers;
+namespace Auth.Infrastructure.Managers;
 
 public class AuthManager : IAuthManager
 {
@@ -28,9 +27,11 @@ public class AuthManager : IAuthManager
 
     public async Task<UserDto> RegisterUser(RegisterDto dto)
     {
-        var userCheck = await _authDbContext.Users.FirstAsync(u => u.Email == dto.Email);
+        var userCheck = await _authDbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        
         if(userCheck is not null)
             throw new WrongInputException("User with this email address already exists.");
+        
         await _passwordManager.HashPassword(
             dto.Password,
             out byte[] passwordHash,
@@ -42,21 +43,21 @@ public class AuthManager : IAuthManager
             LastName = dto.LastName,
             Email = dto.Email,
             PasswordHash = passwordHash,
-            PasswordSalt = passwordSalt,
+            PasswordSalt = passwordSalt
         };
 
-        var result = await _authDbContext.Users.AddAsync(user);
+        var entry = await _authDbContext.Users.AddAsync(user);
         await _authDbContext.SaveChangesAsync();
 
         return new UserDto
         {
-            UserId = result.Entity.Id,
-            Email = result.Entity.Email,
-            Role = result.Entity.Role
+            UserId = entry.Entity.Id,
+            Email = entry.Entity.Email,
+            Role = entry.Entity.Role
         };
     }
 
-    public async Task<string?> LoginUser(LoginDto dto, HttpContext httpContext)
+    public async Task<string> LoginUser(LoginDto dto, HttpContext? httpContext)
     {
         var user = await _authDbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email)
             ?? throw new WrongInputException("Email address or Password is wrong !!! Please try again.");
@@ -68,11 +69,9 @@ public class AuthManager : IAuthManager
         var jwtToken = _tokenManager.GenerateJwtToken(user);
         var refreshToken = _tokenManager.GenerateRefreshToken();
 
-        await SetRefreshToken(refreshToken, httpContext, user);
-
         if (user.Role == ERoles.Unauthorized)
             user.Role = ERoles.Authorized;
-        await _authDbContext.SaveChangesAsync();
+        await SetRefreshToken(refreshToken, httpContext, user);
 
         return jwtToken;
     }

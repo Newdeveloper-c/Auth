@@ -5,7 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
-namespace Auth.Application.Managers;
+namespace Auth.Infrastructure.Managers;
 
 public class TokenManager : ITokenManager
 {

@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Auth.Application.Managers;
+namespace Auth.Infrastructure.Managers;
 
 public class PasswordManager : IPasswordManager
 {
