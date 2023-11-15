@@ -40,7 +40,7 @@ public class GlobalExceptionHandlingMiddlware : IMiddleware
                 probelemDetails.Status = StatusCodes.Status400BadRequest;
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 break;
-            case UnauthorizedAccessException:
+            case InvalidAuthorizationException:
                 probelemDetails.Status = StatusCodes.Status401Unauthorized;
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 break;

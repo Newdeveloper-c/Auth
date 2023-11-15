@@ -5,7 +5,6 @@ namespace Auth.Domain.Entities;
 
 public class User
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public required string FirstName { get; set; }
     public string? LastName { get; set; }

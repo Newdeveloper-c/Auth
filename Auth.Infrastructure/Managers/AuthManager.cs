@@ -6,7 +6,6 @@ using Auth.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Auth.Infrastructure.Managers;
 
 public class AuthManager : IAuthManager
@@ -71,15 +70,16 @@ public class AuthManager : IAuthManager
 
         if (user.Role == ERoles.Unauthorized)
             user.Role = ERoles.Authorized;
+        
         await SetRefreshToken(refreshToken, httpContext, user);
 
         return jwtToken;
     }
 
-    public async Task LogoutUser(HttpContext httpContext)
+    public async Task LogoutUser(HttpContext? httpContext)
     {
         if (!int.TryParse(httpContext.User.FindFirst("Id")?.Value, out var id))
-            throw new UnauthorizedAccessException("User Id not found.");
+            throw new InvalidAuthorizationException("User Id not found.");
 
         var user = await _authDbContext.Users.FirstOrDefaultAsync(x => x.Id == id)
             ?? throw new UserNotFoundException("User not found.");
@@ -88,22 +88,24 @@ public class AuthManager : IAuthManager
         user.CreationTime = null;
         user.ExpireTime = null;
         await _authDbContext.SaveChangesAsync();
+
+
     }
 
     public async Task<string?> UpdateRefreshToken(HttpContext httpContext)
     {
         var refreshToken = httpContext.Request.Cookies["refreshToken"];
         if (refreshToken == null)
-            throw new UnauthorizedAccessException("Cookies not found.");
+            throw new InvalidAuthorizationException("Cookies not found.");
 
         if (!int.TryParse(httpContext.User.FindFirst("Id")?.Value, out var id))
-            throw new UnauthorizedAccessException("User Id not found.");
+            throw new InvalidAuthorizationException("User Id not found.");
 
         var user = await _authDbContext.Users.SingleOrDefaultAsync(x => x.Id == id)
             ?? throw new UserNotFoundException("User not found.");
 
         if (!user.RefreshToken.Equals(refreshToken))
-            throw new UnauthorizedAccessException("Refresh tokens did not match.");
+            throw new InvalidAuthorizationException("Refresh tokens did not match.");
 
         if (user.ExpireTime < DateTime.UtcNow)
             throw new WrongInputException("Refresh token did not expired yet.");
@@ -117,7 +119,7 @@ public class AuthManager : IAuthManager
 
     private async Task SetRefreshToken(
         RefreshToken refreshToken,
-        HttpContext httpContext, 
+        HttpContext? httpContext, 
         User user)
     {
         var cookieOptions = new CookieOptions
@@ -126,7 +128,7 @@ public class AuthManager : IAuthManager
             Expires = refreshToken.Expires,
         };
 
-        httpContext.Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
+        httpContext?.Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
         user.RefreshToken = refreshToken.Token;
         user.CreationTime = refreshToken.Created;
         user.ExpireTime = refreshToken.Expires;

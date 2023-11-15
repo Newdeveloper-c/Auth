@@ -26,14 +26,6 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("UnathorizedUser", policy => policy.RequireRole("Unauthorized"));
-    options.AddPolicy("AthorizedUser", policy => policy.RequireRole("Authorized"));
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("Ceo", policy => policy.RequireRole("Ceo"));
-});
-
 builder.Services.AddHttpContextAccessor();
 
 

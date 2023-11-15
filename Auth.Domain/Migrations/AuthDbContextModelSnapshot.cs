@@ -68,6 +68,25 @@ namespace Auth.Domain.Migrations
 
                     b.ToTable("Users");
                 });
+
+            modelBuilder.Entity("Auth.Domain.Entities.UserVerification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Code")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Verifications");
+                });
 #pragma warning restore 612, 618
         }
     }
