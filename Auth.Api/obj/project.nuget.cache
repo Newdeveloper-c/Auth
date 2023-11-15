@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "OS7XDL6ahAQl6OyHoMZ6DHzmqMjeG13Z71RnXkOt/U+26bBvcJ+zmpCrmhKP6Pm2kgu1T1pf8KLGdMVSDup/5Q==",
+  "dgSpecHash": "lpuPr5tgiNrgXoR2xdAsJOkJAQbRi/Xx6EP8HvHaM3yCls6XxsZjicO3/ZQzMN+PcwZ/74D41mDnfzlhlFCXNA==",
   "success": true,
   "projectFilePath": "C:\\Users\\User\\source\\repos\\Auth\\Auth.Api\\Auth.Api.csproj",
   "expectedPackageFiles": [
@@ -27,6 +27,7 @@
     "C:\\Users\\User\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\7.0.14\\microsoft.entityframeworkcore.analyzers.7.0.14.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.entityframeworkcore.design\\7.0.14\\microsoft.entityframeworkcore.design.7.0.14.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\7.0.14\\microsoft.entityframeworkcore.relational.7.0.14.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.entityframeworkcore.tools\\7.0.14\\microsoft.entityframeworkcore.tools.7.0.14.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\7.0.0\\microsoft.extensions.caching.abstractions.7.0.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.extensions.caching.memory\\7.0.0\\microsoft.extensions.caching.memory.7.0.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\7.0.0\\microsoft.extensions.configuration.abstractions.7.0.0.nupkg.sha512",
