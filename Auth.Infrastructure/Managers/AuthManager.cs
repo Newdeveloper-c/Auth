@@ -1,12 +1,12 @@
 ﻿using Auth.Api.Controllers;
 using Auth.Application.Dtos;
+using Auth.Application.Interfaces;
 using Auth.Application.Exceptions;
-using Auth.Application.Managers.Interfaces;
-using Auth.Application.Services.Interfaces;
 using Auth.Domain.Context;
 using Auth.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace Auth.Application.Managers;
 
@@ -26,25 +26,94 @@ public class AuthManager : IAuthManager
         _authDbContext = authDbContext;
     }
 
-    public Task<string?> GenerateRefreshToken(HttpContext httpContext)
+    public async Task<UserDto> RegisterUser(RegisterDto dto)
     {
-        throw new NotImplementedException();
+        var userCheck = await _authDbContext.Users.FirstAsync(u => u.Email == dto.Email);
+        if(userCheck is not null)
+            throw new WrongInputException("User with this email address already exists.");
+        await _passwordManager.HashPassword(
+            dto.Password,
+            out byte[] passwordHash,
+            out byte[] passwordSalt);
+
+        var user = new User
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            Email = dto.Email,
+            PasswordHash = passwordHash,
+            PasswordSalt = passwordSalt,
+        };
+
+        var result = await _authDbContext.Users.AddAsync(user);
+        await _authDbContext.SaveChangesAsync();
+
+        return new UserDto
+        {
+            UserId = result.Entity.Id,
+            Email = result.Entity.Email,
+            Role = result.Entity.Role
+        };
     }
 
     public async Task<string?> LoginUser(LoginDto dto, HttpContext httpContext)
     {
-        var user = await _authDbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email) 
-            ?? throw new UserNotFoundException("User not found.");
+        var user = await _authDbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email)
+            ?? throw new WrongInputException("Email address or Password is wrong !!! Please try again.");
 
         if (!await _passwordManager.VerifyHashedPassword(dto.Password,
             user.PasswordHash, user.PasswordSalt))
             throw new WrongInputException("Email address or Password is wrong !!! Please try again.");
 
-        var jwtToken = await _tokenManager.GenerateTokenAsync(user);
-        var refreshToken = await _tokenManager.GenerateRefreshTokenAsync();
+        var jwtToken = _tokenManager.GenerateJwtToken(user);
+        var refreshToken = _tokenManager.GenerateRefreshToken();
 
         await SetRefreshToken(refreshToken, httpContext, user);
+
+        if (user.Role == ERoles.Unauthorized)
+            user.Role = ERoles.Authorized;
+        await _authDbContext.SaveChangesAsync();
+
         return jwtToken;
+    }
+
+    public async Task LogoutUser(HttpContext httpContext)
+    {
+        if (!int.TryParse(httpContext.User.FindFirst("Id")?.Value, out var id))
+            throw new UnauthorizedAccessException("User Id not found.");
+
+        var user = await _authDbContext.Users.FirstOrDefaultAsync(x => x.Id == id)
+            ?? throw new UserNotFoundException("User not found.");
+
+        user.RefreshToken = null;
+        user.CreationTime = null;
+        user.ExpireTime = null;
+        await _authDbContext.SaveChangesAsync();
+    }
+
+    public async Task<string?> UpdateRefreshToken(HttpContext httpContext)
+    {
+        var refreshToken = httpContext.Request.Cookies["refreshToken"];
+        if (refreshToken == null)
+            throw new UnauthorizedAccessException("Cookies not found.");
+
+        if (!int.TryParse(httpContext.User.FindFirst("Id")?.Value, out var id))
+            throw new UnauthorizedAccessException("User Id not found.");
+
+        var user = await _authDbContext.Users.SingleOrDefaultAsync(x => x.Id == id)
+            ?? throw new UserNotFoundException("User not found.");
+
+        if (!user.RefreshToken.Equals(refreshToken))
+            throw new UnauthorizedAccessException("Refresh tokens did not match.");
+
+        if (user.ExpireTime < DateTime.UtcNow)
+            throw new WrongInputException("Refresh token did not expired yet.");
+
+        var newJwt = _tokenManager.GenerateJwtToken(user);
+        var newRefreshToken = _tokenManager.GenerateRefreshToken();
+        await SetRefreshToken(newRefreshToken, httpContext, user);
+
+        return newJwt;
     }
 
     private async Task SetRefreshToken(
@@ -66,40 +135,15 @@ public class AuthManager : IAuthManager
         await _authDbContext.SaveChangesAsync();
     }
 
-    public Task<bool> LogoutUser(HttpContext httpContext)
+    public async Task<string> SetRole(RoleDto dto)
     {
-        throw new NotImplementedException();
-    }
-
-    public async Task<UserDto> RegisterUser(RegisterDto dto)
-    {
-        await _passwordManager.HashPassword(
-            dto.Password,
-            out byte[] passwordHash,
-            out byte[] passwordSalt);
-
-        var user = new User
-        {
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            Email = dto.Email,
-            PasswordHash = passwordHash,
-            PasswordSalt = passwordSalt
-        };
-
-        var result = await _authDbContext.Users.AddAsync(user);
+        var user = await _authDbContext.Users.FirstOrDefaultAsync(u => u.Id == dto.UserId)
+            ?? throw new UserNotFoundException("User not found.");
+        
+        user.Role = dto.Role;
         await _authDbContext.SaveChangesAsync();
 
-        return new UserDto
-        {
-            UserId = result.Entity.Id,
-            Email = result.Entity.Email,
-            RoleId = result.Entity.RoleId
-        };
-    }
-
-    public Task<UserDto> SetUserRole(RoleDto dto)
-    {
-        throw new NotImplementedException();
+        var newJwt = _tokenManager.GenerateJwtToken(user);
+        return newJwt;
     }
 }

@@ -16,5 +16,5 @@ public class User
     public DateTime? CreationTime { get; set; }
     public DateTime? ExpireTime { get; set; }
     public bool Verified { get; set; } = false;
-    public ERoles RoleId { get; set; } = ERoles.Unauthorized;
+    public ERoles Role { get; set; } = ERoles.Unauthorized;
 }

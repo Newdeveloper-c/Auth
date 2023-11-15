@@ -1,7 +1,6 @@
 ﻿using Auth.Application.Dtos;
-using Auth.Application.Managers.Interfaces;
+using Auth.Application.Interfaces;
 using Auth.Domain.Entities;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -10,19 +9,18 @@ namespace Auth.Application.Managers;
 
 public class TokenManager : ITokenManager
 {
-    private readonly 
-    public RefreshToken GenerateRefreshTokenAsync()
+    public RefreshToken GenerateRefreshToken()
     {
         var refreshToken = new RefreshToken
         {
             Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-            Expires = DateTime.UtcNow.AddDays(1),
+            Expires = DateTime.UtcNow.AddDays(7),
             Created = DateTime.UtcNow
         };
         return refreshToken;
     }
 
-    public Task<string> GenerateTokenAsync(User user)
+    public string GenerateJwtToken(User user)
     {
         List<Claim> claims = new List<Claim>
         {
@@ -30,12 +28,14 @@ public class TokenManager : ITokenManager
             new ("Email", user.Email)
         };
 
-        if(user.RoleId is not null)
-        {
-            ERoles role = (ERoles)user.RoleId;
-            claims.Add(new("Role", role.ToString()));
-        }
+        claims.Add(new("Role", user.Role.ToString()));
         
+        var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.UtcNow.AddDays(1));
         
+        var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return jwt;
     }
 }

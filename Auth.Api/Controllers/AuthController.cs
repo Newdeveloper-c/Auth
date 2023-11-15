@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Auth.Application.Dtos;
+using Auth.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.Api.Controllers;
@@ -7,29 +9,54 @@ namespace Auth.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthController : Controller
 {
-    [HttpPost]
-    [AllowAnonymous]
-    public IActionResult Register(RegisterDto dto)
+    private readonly IAuthManager _authManager;
+    private readonly IHttpContextAccessor _contextAccessor;
+
+    public AuthController(
+        IAuthManager authManager,
+        IHttpContextAccessor contextAccessor)
     {
-        throw new NotImplementedException();
+        _authManager = authManager;
+        _contextAccessor = contextAccessor;
     }
 
     [HttpPost]
     [AllowAnonymous]
-    public IActionResult Login(LoginDto dto)
+    public async Task<IActionResult> Register(RegisterDto dto)
     {
-        throw new NotImplementedException();
+        var result = await _authManager.RegisterUser(dto);
+        return Ok(result);
     }
 
     [HttpPost]
-    public IActionResult Logout()
+    [AllowAnonymous]
+    public async Task<IActionResult> Login(LoginDto dto)
     {
-        throw new NotImplementedException();
+        var currentContext = _contextAccessor.HttpContext;
+        var token = await _authManager.LoginUser(dto, currentContext);
+        return Ok(token);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Logout()
+    {
+        var currentContext = _contextAccessor.HttpContext;
+        await _authManager.LogoutUser(currentContext);
+        return Ok("Successfully logged out.");
     }
 
     [HttpGet]
-    public IActionResult RefreshToken() 
+    public async Task<IActionResult> RefreshToken() 
     {
-        throw new NotImplementedException();
+        var currentContext = _contextAccessor.HttpContext;
+        var token = await _authManager.UpdateRefreshToken(currentContext);
+        return Ok(token);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SetRole(RoleDto dto) 
+    {
+        var result = _authManager.SetRole(dto);
+        return Ok(result);
     }
 }

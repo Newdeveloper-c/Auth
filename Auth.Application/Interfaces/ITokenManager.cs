@@ -5,6 +5,6 @@ namespace Auth.Application.Interfaces;
 
 public interface ITokenManager
 {
-    Task<string> GenerateTokenAsync(User user);
-    RefreshToken GenerateRefreshTokenAsync();
+    string GenerateJwtToken(User user);
+    RefreshToken GenerateRefreshToken();
 }

@@ -6,5 +6,5 @@ public class UserDto
 {
     public int? UserId { get; set; }
     public string? Email { get; set; }
-    public ERoles? RoleId { get; set; }
+    public ERoles? Role { get; set; }
 }
