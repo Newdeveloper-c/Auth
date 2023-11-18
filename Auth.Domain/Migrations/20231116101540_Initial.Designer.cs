@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Auth.Domain.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20231115134804_Initial")]
+    [Migration("20231116101540_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -70,6 +70,38 @@ namespace Auth.Domain.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Auth.Domain.Entities.UserVerification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Code")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Verifications");
+                });
+
+            modelBuilder.Entity("Auth.Domain.Entities.UserVerification", b =>
+                {
+                    b.HasOne("Auth.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

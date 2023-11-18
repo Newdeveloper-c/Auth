@@ -32,6 +32,9 @@
               "C:\\Users\\User\\source\\repos\\Auth\\Auth.Application\\Auth.Application.csproj": {
                 "projectPath": "C:\\Users\\User\\source\\repos\\Auth\\Auth.Application\\Auth.Application.csproj"
               },
+              "C:\\Users\\User\\source\\repos\\Auth\\Auth.Domain\\Auth.Domain.csproj": {
+                "projectPath": "C:\\Users\\User\\source\\repos\\Auth\\Auth.Domain\\Auth.Domain.csproj"
+              },
               "C:\\Users\\User\\source\\repos\\Auth\\Auth.Infrastructure\\Auth.Infrastructure.csproj": {
                 "projectPath": "C:\\Users\\User\\source\\repos\\Auth\\Auth.Infrastructure\\Auth.Infrastructure.csproj"
               }
@@ -49,6 +52,10 @@
           "targetAlias": "net7.0",
           "dependencies": {
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[7.0.14, )"
+            },
+            "Microsoft.AspNetCore.HeaderPropagation": {
               "target": "Package",
               "version": "[7.0.14, )"
             },
@@ -269,6 +276,10 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.3.0, )"
+            },
             "Microsoft.AspNetCore.Mvc.Core": {
               "target": "Package",
               "version": "[2.2.5, )"

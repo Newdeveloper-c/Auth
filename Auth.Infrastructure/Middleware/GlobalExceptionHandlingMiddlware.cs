@@ -26,8 +26,7 @@ public class GlobalExceptionHandlingMiddlware : IMiddleware
         var probelemDetails = new ProblemDetails
         {
             Title = ex.Message,
-            Type = ex.Source,
-            
+            Type = ex.Source
         };
 
         switch(ex)

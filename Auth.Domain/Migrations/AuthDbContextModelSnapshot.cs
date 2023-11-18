@@ -85,7 +85,20 @@ namespace Auth.Domain.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Verifications");
+                });
+
+            modelBuilder.Entity("Auth.Domain.Entities.UserVerification", b =>
+                {
+                    b.HasOne("Auth.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

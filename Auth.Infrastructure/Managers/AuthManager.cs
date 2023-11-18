@@ -5,6 +5,7 @@ using Auth.Domain.Context;
 using Auth.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Auth.Infrastructure.Managers;
 
@@ -24,11 +25,9 @@ public class AuthManager : IAuthManager
         _authDbContext = authDbContext;
     }
 
-    public async Task<UserDto> RegisterUser(RegisterDto dto)
+    public async Task<bool> RegisterUser(RegisterDto dto)
     {
-        var userCheck = await _authDbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        
-        if(userCheck is not null)
+        if(await _authDbContext.Users.AnyAsync(u => u.Email == dto.Email))
             throw new WrongInputException("User with this email address already exists.");
         
         await _passwordManager.HashPassword(
@@ -48,12 +47,13 @@ public class AuthManager : IAuthManager
         var entry = await _authDbContext.Users.AddAsync(user);
         await _authDbContext.SaveChangesAsync();
 
-        return new UserDto
-        {
-            UserId = entry.Entity.Id,
-            Email = entry.Entity.Email,
-            Role = entry.Entity.Role
-        };
+        return true;
+        //return new UserDto
+        //{
+        //    UserId = entry.Entity.Id,
+        //    Email = entry.Entity.Email,
+        //    Role = entry.Entity.Role
+        //};
     }
 
     public async Task<string> LoginUser(LoginDto dto, HttpContext? httpContext)
@@ -76,7 +76,7 @@ public class AuthManager : IAuthManager
         return jwtToken;
     }
 
-    public async Task LogoutUser(HttpContext? httpContext)
+    public async Task<bool> LogoutUser(HttpContext? httpContext)
     {
         if (!int.TryParse(httpContext.User.FindFirst("Id")?.Value, out var id))
             throw new InvalidAuthorizationException("User Id not found.");
@@ -89,7 +89,9 @@ public class AuthManager : IAuthManager
         user.ExpireTime = null;
         await _authDbContext.SaveChangesAsync();
 
-
+        httpContext.Response.Cookies.Delete("refreshToken");
+        await httpContext.SignOutAsync("Bearer");
+        return true;
     }
 
     public async Task<string?> UpdateRefreshToken(HttpContext httpContext)
